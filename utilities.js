@@ -1,6 +1,9 @@
 const https = require('https');
 const fs = require("fs");
 
+/*
+    Парсим пост с joyreactor и отправляем в чат с удалением сообщения отправителя
+*/
 const getJoyreactor = (bot, chatId, messageId, text) => {
     try {
         https.get(text, function (res) {
@@ -25,6 +28,9 @@ const getJoyreactor = (bot, chatId, messageId, text) => {
     catch (err) { console.log(err) }
 }
 
+/*
+    Отправляем рандомный фильм
+*/
 const getRandomMovie = (bot, chatId) => {
     const randomMovie = getMovie();
 
@@ -50,11 +56,17 @@ const getRandomMovie = (bot, chatId) => {
     }
 }
 
+/*
+    Функция получения рандомного фильма с файла movies.json
+*/
 const getMovie = () => {
     const json = JSON.parse(fs.readFileSync("./movies.json", "utf-8"));
     return json[random(0, json.length)];
 };
 
+/*
+    Функция рандома чисел
+*/
 const random = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 module.exports = {
