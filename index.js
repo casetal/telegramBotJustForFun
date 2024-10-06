@@ -1,10 +1,8 @@
-const { log } = require("console");
-const fs = require("fs");
-const https = require('https');
-
 const TelegramBot = require("node-telegram-bot-api");
 const token = "6536424421:AAE9WZzSyu5tkUSoG4MiJM9csYJBOy1b0aY";
 const bot = new TelegramBot(token, { polling: true });
+
+const utilites = require('./utilities.js');
 
 bot.onText("/start", (msg) => {
   const chatId = msg.chat.id;
@@ -18,35 +16,11 @@ bot.onText("/start", (msg) => {
 
 bot.onText("/movie", (msg) => {
   const chatId = msg.chat.id;
-  const randomMovie = getMovie();
-
-  console.log(`Username: @${msg.chat.username}, movie: ${randomMovie.title}`);
-
-  if (randomMovie.thumbnail) {
-    bot.sendPhoto(chatId, randomMovie.thumbnail, {
-      caption:
-        "📺 " + randomMovie.title +
-        (randomMovie.year ? ` (${randomMovie.year})` : "") +
-        (randomMovie.extract ? `\n\n<i>${randomMovie.extract}</i>` : "") +
-        (randomMovie.cast
-          ? `\n\n👥 <b>Cast:</b> ${randomMovie.cast.join(", ")}`
-          : "") +
-        (randomMovie.genres
-          ? `\n❓ <b>Genres:</b> ${randomMovie.genres.join(", ")}`
-          : "") +
-        (randomMovie.href
-          ? `\n🔗 <b>Wiki:</b> https://en.wikipedia.org/wiki/${randomMovie.href}`
-          : ""),
-      parse_mode: "html",
-    });
-  } else {
-    bot.sendMessage(chatId, randomMovie.title);
-  }
+  utilites.randomMovie(bot, chatId);
 });
 
-const getMovie = () => {
-  const json = JSON.parse(fs.readFileSync("./movies.json", "utf-8"));
-  return json[random(0, json.length)];
-};
-
-const random = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+bot.on('message', (msg) => {
+    if(msg.text.includes('joyreactor')) {
+        utilites.joyreactor(bot, msg.chat.id, msg.message_id, msg.text);
+    }
+});
