@@ -2,11 +2,11 @@ const https = require('https');
 const json = require('./movies.json');
 
 /*
-    Парсим пост с joyreactor и отправляем в чат с удалением сообщения отправителя
+    Парсим пост с joyreactor и отправляем в чат с удалением сообщения отправителя.
 */
 const getJoyreactor = (bot, chatId, messageId, text) => {
     try {
-        https.get(text, function (res) {
+        https.get(text, (res) => {
             res.setEncoding('utf8');
             res.on('data', (data) => {
                 const result = data.match(/}, "headline": "(.*?)"(.*?)"url": "\/\/(.*?)"/);
@@ -21,7 +21,7 @@ const getJoyreactor = (bot, chatId, messageId, text) => {
                     bot.deleteMessage(chatId, messageId);
                 }
             });
-        }).on('error', function (err) {
+        }).on('error', (err) => {
             console.log(err);
         });
     }
@@ -33,7 +33,7 @@ const getJoyreactor = (bot, chatId, messageId, text) => {
 */
 const getRandomMovie = (bot, chatId) => {
     const randomMovie = json[random(0, json.length)];
-
+    
     if (randomMovie.thumbnail) {
         bot.sendPhoto(chatId, randomMovie.thumbnail, {
             caption:
@@ -57,11 +57,50 @@ const getRandomMovie = (bot, chatId) => {
 }
 
 /*
+    Получает рандомное изображение с поискового запроса
+    
+    TODO:
+    - Переделать под duckduckgo
+    - Обработать если ничего не нашло или кривая ссылка изображения.
+*/
+const getResultImages = (bot, chatId, messageId, text) => {
+    text = text.replace('/search ', '').replace('/search@alexey_mr_bot ', '');
+
+    console.log(`https://yandex.ru/images/search?from=tabbar&text=${text}`);
+    let html = "";
+
+    https.get(`https://www.yandex.ru/images/search?from=tabbar&text=${encodeURI(text)}`, (res) => {
+        console.log(res.statusCode);
+
+        if(res.statusCode == 302) {
+            console.log(res.headers.location);
+        }
+        
+        res.setEncoding('utf8');
+        res.on('data', (data) => {
+            html += data;
+        })
+        res.on('end', () => {
+            const result = html.match(/https?:\/\/(.*?)(?:png|jpg)/g);
+            
+            if(result) {
+                bot.sendPhoto(chatId, result[random(0, result.length)].replace(';', ''), {
+                    caption: `Результат по запросу: ${text}`
+                });
+            } else {
+                console.log(html);
+            }
+        })
+    })
+}
+
+/*
     Функция рандома чисел
 */
 const random = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 module.exports = {
     joyreactor: getJoyreactor,
-    randomMovie: getRandomMovie
+    randomMovie: getRandomMovie,
+    imageResult: getResultImages
 };
