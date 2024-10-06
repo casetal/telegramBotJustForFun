@@ -15,16 +15,16 @@ bot.onText("/start", (msg) => {
     );
 });
 
-bot.onText("/movie", (msg) => {
-    utilites.randomMovie(bot, msg.chat.id);
-});
-
-bot.onText("/search", (msg) => {
-    utilites.imageResult(bot, msg.chat.id, msg.message_id, msg.text);
-});
-
 bot.on('message', (msg) => {
-    if (msg.text.includes('joyreactor')) {
+    const text = msg.text;
+
+    if (text.includes('joyreactor')) {
         utilites.joyreactor(bot, msg.chat.id, msg.message_id, msg.text);
+    } else if(text.includes('/anek')) {
+        utilites.anek(bot, msg.chat.id, msg.message_id, msg.text);
+    } else if(text.includes('/search')) {
+        utilites.imageResult(bot, msg.chat.id, msg.text);
+    } else if(text.includes('/movie')) {
+        utilites.randomMovie(bot, msg.chat.id);
     }
 });

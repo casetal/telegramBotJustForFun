@@ -57,13 +57,13 @@ const getRandomMovie = (bot, chatId) => {
 }
 
 /*
-    Получает рандомное изображение с поискового запроса
+    Отправляем рандомное изображение с поискового запроса
     
     TODO:
     - Переделать под duckduckgo
     - Обработать если ничего не нашло или кривая ссылка изображения.
 */
-const getResultImages = (bot, chatId, messageId, text) => {
+const getResultImages = (bot, chatId, text) => {
     text = text.replace('/search ', '').replace('/search@alexey_mr_bot ', '');
 
     console.log(`https://yandex.ru/images/search?from=tabbar&text=${text}`);
@@ -92,6 +92,28 @@ const getResultImages = (bot, chatId, messageId, text) => {
             }
         })
     })
+
+}
+
+/*
+    Отправляем рандомный анекдот
+*/
+const getAneks = (bot, chatId) => {
+    let html = "";
+    let url = `https://baneks.ru/${random(1, 1200)}`;
+    https.get(url, (res) => {
+        res.setEncoding('utf8');
+        res.on('data', (data) => {
+            html += data;
+        })
+        res.on('end', () => {
+            const result = html.match(/<article>(.*?)<p>(.*?)<\/p>(.*?)<\/article>/gs);
+            console.log(url, result);
+            if(result) {
+                bot.sendMessage(chatId, result.join('').replace(/<h2>(.*?)<\/h2>/, '').replace(/<(.*?)>/g, ''));
+            }
+        })
+    })
 }
 
 /*
@@ -102,5 +124,6 @@ const random = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 module.exports = {
     joyreactor: getJoyreactor,
     randomMovie: getRandomMovie,
-    imageResult: getResultImages
+    imageResult: getResultImages,
+    anek: getAneks
 };
